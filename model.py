@@ -402,3 +402,28 @@ for note in sample_notes:
     print(f"Note: '{note}' → Category: '{cat}' (Confidence: {prob:.2f})")
 
 print("\nModel training and evaluation complete!")
+
+def categorize_and_visualize_transactions(transaction_df, model_package):
+    # Categorize transactions using the NLP model
+    transaction_df['predicted_category'] = transaction_df['note'].apply(
+        lambda x: predict_category(x, model_package)[0]
+    )
+    
+    # Create visualizations based on categories
+    plt.figure(figsize=(12, 8))
+    
+    # Pie chart for category distribution
+    plt.subplot(1, 2, 1)
+    category_counts = transaction_df['predicted_category'].value_counts()
+    plt.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%')
+    plt.title('Transaction Distribution by Category')
+    
+    # Bar chart for spending by category
+    plt.subplot(1, 2, 2)
+    category_sums = transaction_df.groupby('predicted_category')['amount'].sum().sort_values(ascending=False)
+    sns.barplot(x=category_sums.index, y=category_sums.values)
+    plt.title('Spending by Category')
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    
+    return transaction_df
